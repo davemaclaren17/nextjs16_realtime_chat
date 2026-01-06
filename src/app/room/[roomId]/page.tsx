@@ -108,7 +108,7 @@ const Page = () => {
                   Room ID
                 </span>
                 <div className="mt-1 flex items-center gap-2">
-                  <span className="font-bold text-green-500 truncate max-w-[220px] sm:max-w-none">
+                  <span className="font-bold text-green-500 truncate max-w-55 sm:max-w-none">
                     {roomId.slice(0, 10) + "..."}
                   </span>
                   <button
@@ -178,7 +178,7 @@ const Page = () => {
                     </span>
                   </div>
 
-                  <p className="text-sm leading-relaxed text-zinc-100 break-words">
+                  <p className="text-sm leading-relaxed text-zinc-100 wrap-break-word">
                     {msg.text}
                   </p>
                 </div>
