@@ -26,7 +26,7 @@ export const proxy = async (req: NextRequest) => {
   }
 
   // USER IS NOT ALLOWED TO JOIN
-  const MAX_ROOM_USERS = Number(process.env.MAX_ROOM_USERS ?? "3")
+  const MAX_ROOM_USERS = Number(process.env.MAX_ROOM_USERS ?? "5")
   if (meta.connected.length >= MAX_ROOM_USERS) {
     return NextResponse.redirect(new URL("/?error=room-full", req.url))
   }
