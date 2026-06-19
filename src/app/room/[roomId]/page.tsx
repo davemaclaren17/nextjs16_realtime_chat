@@ -190,9 +190,9 @@ const Page = () => {
 
       {/* INPUT */}
       <div className="sticky bottom-0 border-t border-zinc-800 bg-zinc-900/40 backdrop-blur">
-        <div className="mx-auto w-full max-w-2xl px-4 py-3 pb-[env(safe-area-inset-bottom)]">
-          <div className="flex items-stretch gap-3">
-            <div className="flex-1 relative">
+        <div className="mx-auto w-full max-w-2xl px-3 py-3 pb-[env(safe-area-inset-bottom)] sm:px-4">
+          <div className="flex min-w-0 items-stretch gap-2 sm:gap-3">
+            <div className="relative min-w-0 flex-1">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-green-500">
                 {">"}
               </span>
@@ -220,7 +220,7 @@ const Page = () => {
                 inputRef.current?.focus()
               }}
               disabled={!input.trim() || isPending}
-              className="shrink-0 rounded-xl bg-zinc-800 px-5 py-3.5 text-sm font-bold text-zinc-100 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-18 shrink-0 rounded-xl bg-zinc-800 py-3.5 text-sm font-bold text-zinc-100 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto sm:px-5"
             >
               SEND
             </button>
