@@ -209,7 +209,7 @@ const Page = () => {
                 }}
                 placeholder="Type message..."
                 onChange={(e) => setInput(e.target.value)}
-                className="w-full rounded-xl bg-black/40 border border-zinc-800 focus:border-zinc-700 focus:outline-none transition-colors text-zinc-100 placeholder:text-zinc-600 py-3.5 pl-8 pr-4 text-sm"
+                className="w-full rounded-xl bg-black/40 border border-zinc-800 focus:border-zinc-700 focus:outline-none transition-colors text-zinc-100 placeholder:text-zinc-600 py-3.5 pl-8 pr-4 text-[16px] sm:text-sm"
               />
             </div>
 
