@@ -4,7 +4,7 @@ import { useUsername } from "@/hooks/use-username"
 import { client } from "@/lib/client"
 import { useMutation } from "@tanstack/react-query"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Suspense } from "react"
+import { Suspense, useState } from "react"
 
 const Page = () => {
   return (
@@ -19,18 +19,26 @@ export default Page
 function Lobby() {
   const { username } = useUsername()
   const router = useRouter()
+  const [createError, setCreateError] = useState<string | null>(null)
 
   const searchParams = useSearchParams()
   const wasDestroyed = searchParams.get("destroyed") === "true"
   const error = searchParams.get("error")
 
-  const { mutate: createRoom } = useMutation({
+  const { mutate: createRoom, isPending: isCreatingRoom } = useMutation({
     mutationFn: async () => {
+      setCreateError(null)
       const res = await client.room.create.post()
 
       if (res.status === 200) {
         router.push(`/room/${res.data?.roomId}`)
+        return
       }
+
+      throw new Error("Could not create room. Check the Supabase environment variables.")
+    },
+    onError: (error) => {
+      setCreateError(error instanceof Error ? error.message : "Could not create room.")
     },
   })
 
@@ -61,6 +69,12 @@ function Lobby() {
             </p>
           </div>
         )}
+        {createError && (
+          <div className="bg-red-950/50 border border-red-900 p-4 text-center">
+            <p className="text-red-500 text-sm font-bold">ROOM CREATE FAILED</p>
+            <p className="text-zinc-500 text-xs mt-1">{createError}</p>
+          </div>
+        )}
 
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold tracking-tight text-green-500">
@@ -83,9 +97,10 @@ function Lobby() {
 
             <button
               onClick={() => createRoom()}
+              disabled={isCreatingRoom}
               className="w-full bg-zinc-100 text-black p-3 text-sm font-bold hover:bg-zinc-50 hover:text-black transition-colors mt-2 cursor-pointer disabled:opacity-50"
             >
-              CREATE SECURE ROOM
+              {isCreatingRoom ? "CREATING..." : "CREATE SECURE ROOM"}
             </button>
           </div>
         </div>
