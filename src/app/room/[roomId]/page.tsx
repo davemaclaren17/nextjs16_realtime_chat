@@ -35,8 +35,14 @@ const Page = () => {
   })
 
   useEffect(() => {
-    if (ttlData?.ttl !== undefined) setTimeRemaining(ttlData.ttl)
-  }, [ttlData])
+    if (ttlData?.ttl === undefined) return
+
+    const frame = requestAnimationFrame(() => {
+      setTimeRemaining(ttlData.ttl)
+    })
+
+    return () => cancelAnimationFrame(frame)
+  }, [ttlData?.ttl])
 
   useEffect(() => {
     if (timeRemaining === null || timeRemaining < 0) return

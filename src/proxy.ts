@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { redis } from "./lib/redis"
 import { nanoid } from "nanoid"
+import { getConnectedTokens, joinRoom } from "./lib/database"
 
 export const proxy = async (req: NextRequest) => {
   const pathname = req.nextUrl.pathname
@@ -10,40 +10,38 @@ export const proxy = async (req: NextRequest) => {
 
   const roomId = roomMatch[1]
 
-  const meta = await redis.hgetall<{ connected: string[]; createdAt: number }>(
-    `meta:${roomId}`
-  )
+  const connected = await getConnectedTokens(roomId)
 
-  if (!meta) {
+  if (!connected) {
     return NextResponse.redirect(new URL("/?error=room-not-found", req.url))
   }
 
   const existingToken = req.cookies.get("x-auth-token")?.value
 
   // USER IS ALLOWED TO JOIN ROOM
-  if (existingToken && meta.connected.includes(existingToken)) {
+  if (existingToken && connected.includes(existingToken)) {
     return NextResponse.next()
-  }
-
-  // USER IS NOT ALLOWED TO JOIN
-  const MAX_ROOM_USERS = Number(process.env.MAX_ROOM_USERS ?? "10")
-  if (meta.connected.length >= MAX_ROOM_USERS) {
-    return NextResponse.redirect(new URL("/?error=room-full", req.url))
   }
 
   const response = NextResponse.next()
 
   const token = nanoid()
+  const MAX_ROOM_USERS = Number(process.env.MAX_ROOM_USERS ?? "10")
+  const joinResult = await joinRoom(roomId, token, MAX_ROOM_USERS)
+
+  if (joinResult === "missing") {
+    return NextResponse.redirect(new URL("/?error=room-not-found", req.url))
+  }
+
+  if (joinResult === "full") {
+    return NextResponse.redirect(new URL("/?error=room-full", req.url))
+  }
 
   response.cookies.set("x-auth-token", token, {
     path: "/",
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
-  })
-
-  await redis.hset(`meta:${roomId}`, {
-    connected: [...meta.connected, token],
   })
 
   return response
