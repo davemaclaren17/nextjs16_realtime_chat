@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "allowScripts": {
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.11.1": true
+  },
   "dependencies": {
     "@elysiajs/eden": "^1.4.6",
     "@supabase/supabase-js": "^2.116.0",
