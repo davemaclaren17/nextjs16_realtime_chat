@@ -11,16 +11,11 @@ Required environment variables:
 
 ```bash
 SUPABASE_URL="https://your-project-ref.supabase.co"
-NEXT_PUBLIC_SUPABASE_URL="https://your-project-ref.supabase.co"
 SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
 ```
 
-Upstash is still used for realtime event fan-out:
-
-```bash
-UPSTASH_REDIS_REST_URL="https://your-upstash-url.upstash.io"
-UPSTASH_REDIS_REST_TOKEN="your-upstash-rest-token"
-```
+No Upstash Redis or Upstash Realtime environment variables are required.
+The chat screen refreshes messages through the server API every few seconds.
 
 ## Getting Started
 

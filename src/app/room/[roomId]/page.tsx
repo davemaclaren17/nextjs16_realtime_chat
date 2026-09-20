@@ -2,7 +2,6 @@
 
 import { useUsername } from "@/hooks/use-username"
 import { client } from "@/lib/client"
-import { useRealtime } from "@/lib/realtime-client"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { format } from "date-fns"
 import { useParams, useRouter } from "next/navigation"
@@ -26,12 +25,18 @@ const Page = () => {
   const [copyStatus, setCopyStatus] = useState("COPY")
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
 
-  const { data: ttlData } = useQuery({
+  const {
+    data: ttlData,
+    error: ttlError,
+  } = useQuery({
     queryKey: ["ttl", roomId],
     queryFn: async () => {
       const res = await client.room.ttl.get({ query: { roomId } })
+      if (res.status !== 200 || !res.data) throw new Error("Room unavailable")
       return res.data
     },
+    retry: false,
+    refetchInterval: 10000,
   })
 
   useEffect(() => {
@@ -65,33 +70,43 @@ const Page = () => {
     return () => clearInterval(interval)
   }, [timeRemaining, router])
 
-  const { data: messages, refetch } = useQuery({
+  const {
+    data: messages,
+    error: messagesError,
+    refetch,
+  } = useQuery({
     queryKey: ["messages", roomId],
     queryFn: async () => {
       const res = await client.messages.get({ query: { roomId } })
+      if (res.status !== 200 || !res.data) throw new Error("Room unavailable")
       return res.data
     },
+    retry: false,
+    refetchInterval: 2000,
   })
+
+  useEffect(() => {
+    if (ttlError || messagesError) router.push("/?destroyed=true")
+  }, [messagesError, router, ttlError])
 
   const { mutate: sendMessage, isPending } = useMutation({
     mutationFn: async ({ text }: { text: string }) => {
-      await client.messages.post({ sender: username, text }, { query: { roomId } })
+      const res = await client.messages.post({ sender: username, text }, { query: { roomId } })
+      if (res.status !== 200) throw new Error("Message failed")
       setInput("")
     },
-  })
-
-  useRealtime({
-    channels: [roomId],
-    events: ["chat.message", "chat.destroy"],
-    onData: ({ event }) => {
-      if (event === "chat.message") refetch()
-      if (event === "chat.destroy") router.push("/?destroyed=true")
+    onSuccess: () => {
+      refetch()
     },
   })
 
   const { mutate: destroyRoom } = useMutation({
     mutationFn: async () => {
-      await client.room.delete(null, { query: { roomId } })
+      const res = await client.room.delete(null, { query: { roomId } })
+      if (res.status !== 200) throw new Error("Room destroy failed")
+    },
+    onSuccess: () => {
+      router.push("/?destroyed=true")
     },
   })
 

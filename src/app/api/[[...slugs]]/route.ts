@@ -10,7 +10,7 @@ import { Elysia } from "elysia"
 import { nanoid } from "nanoid"
 import { authMiddleware } from "./auth"
 import { z } from "zod"
-import { Message, realtime } from "@/lib/realtime"
+import type { Message } from "@/lib/messages"
 
 const rooms = new Elysia({ prefix: "/room" })
   .post("/create", async () => {
@@ -32,8 +32,6 @@ const rooms = new Elysia({ prefix: "/room" })
   .delete(
     "/",
     async ({ auth }) => {
-      await realtime.channel(auth.roomId).emit("chat.destroy", { isDestroyed: true })
-
       await deleteRoom(auth.roomId)
     },
     { query: z.object({ roomId: z.string() }) }
@@ -61,7 +59,6 @@ const messages = new Elysia({ prefix: "/messages" })
 
       // add message to history
       await addMessage(message, auth.token)
-      await realtime.channel(roomId).emit("chat.message", message)
     },
     {
       query: z.object({ roomId: z.string() }),

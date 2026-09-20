@@ -1,4 +1,4 @@
-import type { Message } from "@/lib/realtime"
+import type { Message } from "@/lib/messages"
 import { getSupabase } from "@/lib/supabase"
 
 export const ROOM_TTL_SECONDS = 60 * 1440
